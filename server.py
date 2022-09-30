@@ -1,6 +1,7 @@
 #  coding: utf-8
 import socketserver
 from urllib import response
+import os
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 #
@@ -32,19 +33,34 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        reqPage = self.data.decode('utf-8').split(" ")[1].split("/")
-        reqPage = list(filter(None, reqPage))
+        # print(self.data.decode('utf-8'))
+        reqPage = self.data.decode('utf-8').split(" ")[1]
+        reqPageSplit = self.data.decode('utf-8').split(" ")[1].split("/")
+        reqPageSplit = list(filter(None, reqPageSplit))
 
-        if (len(reqPage) != 0 and reqPage[0] == "favicon.ico"):
+        mainDir = os.listdir("./www/")
+        nestDir = [x for x in mainDir if "." not in x]
+
+        if ("Referer" not in self.data.decode('utf-8') and (".css" in reqPage or ".ico" in reqPage)):
+            print("no Ref", reqPageSplit)
+            self.request.sendall(
+                'HTTP/1.1 405 Not Found\r\n'.encode('utf-8'))
             return
 
-        if (len(reqPage) == 0 or 'index.html' in reqPage[0]):
+        print(reqPageSplit)
+        print(os.listdir("./www/"))
+
+        if (len(reqPageSplit) != 0 and reqPageSplit[0] == "favicon.ico"):
+            return
+
+        if (len(reqPageSplit) == 0 or 'index.html' in reqPageSplit[0]):
             myFile = "./www/index.html"
         else:
-            if (".css" in reqPage[0]):
+            if (".css" in reqPageSplit[0]):
+                # print(reqPage)
                 myFile = "./www/base.css"
-            elif ("deep" in reqPage[0]):
-                if (len(reqPage) > 1 and ".css" in reqPage[1]):
+            elif ("deep" in reqPageSplit[0]):
+                if (len(reqPageSplit) > 1 and ".css" in reqPageSplit[1]):
                     myFile = "./www/deep/deep.css"
                 else:
                     myFile = "./www/deep/index.html"
@@ -55,7 +71,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
             file.close()
 
             header = "HTTP/1.1 200 OK\n"
-
             if (myFile.endswith(".jpg")):
                 mimetype = 'image/jpg'
             elif (myFile.endswith(".css")):
@@ -72,7 +87,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         final_response = header.encode('utf-8')
         # print("final", final_response, type(final_response))
         # if (type(response) == "str"):
-            # print("Not bytes", response)
+        # print("Not bytes", response)
         # print("response", response, type(response))
         final_response += response
 
