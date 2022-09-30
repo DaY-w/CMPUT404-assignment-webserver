@@ -32,11 +32,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        print("Got a request of: %s\n" % self.data)
-        # print(self.data.decode('utf-8').split(" ")[1])
         reqPage = self.data.decode('utf-8').split(" ")[1].split("/")
         reqPage = list(filter(None, reqPage))
-        # print(reqPage)
+
+        if (reqPage[0] == "favicon.ico"):
+            return
+
         if (len(reqPage) == 0 or 'index.html' in reqPage[0]):
             myFile = "./www/index.html"
         else:
@@ -47,16 +48,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     myFile = "./www/deep/deep.css"
                 else:
                     myFile = "./www/deep/index.html"
-
-        # if (self.data.decode('utf-8').split(" ")[1] == "/"):
-        #     myFile = "./www/index.html"
-        #     print("MAINNNN")
-        # elif (self.data.decode('utf-8').split(" ")[1].strip() == "/deep/index.html"):
-        #     print("DEEEEEEEEEEEEEEEEEEEEEEEEp")
-        #     myFile = "./www/deep/index.html"
-        # else:
-        #     myFile = "./www/base.css"
-        #     print("fail")
 
         try:
             file = open(myFile, 'rb')
@@ -75,9 +66,14 @@ class MyWebServer(socketserver.BaseRequestHandler):
             header += 'Content-Type: '+str(mimetype)+'\n\n'
         except Exception as e:
             header = 'HTTP/1.1 404 Not Found\n\n'
-            response = '<html><body><center><h3>Error 404: File not found</h3><p>Python HTTP Server</p></center></body></html>'
+            response = ''.encode('utf-8')
 
+        print("header", header, type(header))
         final_response = header.encode('utf-8')
+        print("final", final_response, type(final_response))
+        if (type(response) == "str"):
+            print("Not bytes", response)
+        print("response", response, type(response))
         final_response += response
 
         self.request.sendall(final_response)
