@@ -40,26 +40,36 @@ class MyWebServer(socketserver.BaseRequestHandler):
         mainDir = os.listdir("./www/")
         nestDir = [x for x in mainDir if "." not in x]
 
-        # if ("Referer" not in self.data.decode('utf-8') and (".css" in reqPage or ".ico" in reqPage)):
-        #     print("no Ref", reqPageSplit)
-        #     self.request.sendall(
-        #         'HTTP/1.1 405 Not Found\r\n'.encode('utf-8'))
-        #     return
+        if ("../" in reqPage):
+            self.request.sendall(
+                'HTTP/1.1 404 Not Found\r\n'.encode('utf-8'))
+            return
+
+        if(self.data.decode('utf-8').split(" ")[0] != "GET"):
+            self.request.sendall(
+                'HTTP/1.1 405 Not Found\r\n'.encode('utf-8'))
+            return
 
         if (".ico" in reqPage):
             return
 
-        # print(reqPageSplit)
+        # print(reqPage)
 
         myFile = "./www/{}".format("/".join(reqPageSplit))
-        print(myFile)
+
+        if (myFile[-1] == "/" and "." not in myFile[1:]):
+            print("CHANGED")
+            self.request.sendall(
+                ('HTTP/1.1 301 Moved Permanently\r\nLocation: {}/index.html'.format(reqPageSplit[0])).encode('utf-8'))
+            return
+        # print(myFile)
         if (myFile[-1] == "/"):
             myFile += "index.html"
-        elif ("." not in myFile[1:]):
-            print("change")
+        if ("." not in myFile[1:]):
+            # print("change")
             myFile += "/index.html"
 
-        print(myFile)
+        # print(myFile)
         # print("./www/{}".format("/".join(reqPageSplit)))
         # if (len(reqPageSplit) == 0):
         #     print("./www/index.html")
