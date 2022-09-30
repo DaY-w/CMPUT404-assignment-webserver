@@ -35,7 +35,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         reqPage = self.data.decode('utf-8').split(" ")[1].split("/")
         reqPage = list(filter(None, reqPage))
 
-        if (reqPage[0] == "favicon.ico"):
+        if (len(reqPage) != 0 and reqPage[0] == "favicon.ico"):
             return
 
         if (len(reqPage) == 0 or 'index.html' in reqPage[0]):
@@ -44,7 +44,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             if (".css" in reqPage[0]):
                 myFile = "./www/base.css"
             elif ("deep" in reqPage[0]):
-                if (".css" in reqPage[1]):
+                if (len(reqPage) > 1 and ".css" in reqPage[1]):
                     myFile = "./www/deep/deep.css"
                 else:
                     myFile = "./www/deep/index.html"
@@ -68,12 +68,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
             header = 'HTTP/1.1 404 Not Found\n\n'
             response = ''.encode('utf-8')
 
-        print("header", header, type(header))
+        # print("header", header, type(header))
         final_response = header.encode('utf-8')
-        print("final", final_response, type(final_response))
-        if (type(response) == "str"):
-            print("Not bytes", response)
-        print("response", response, type(response))
+        # print("final", final_response, type(final_response))
+        # if (type(response) == "str"):
+            # print("Not bytes", response)
+        # print("response", response, type(response))
         final_response += response
 
         self.request.sendall(final_response)

@@ -48,6 +48,7 @@ class TestYourWebserver(unittest.TestCase):
             req = request.urlopen(url, None, 3)
             self.assertTrue( False, "Should have thrown an HTTP Error!")
         except request.HTTPError as e:
+            print("############################ GET CODE", e.getcode())
             self.assertTrue( e.getcode()  == 404 , ("404 Not FOUND! %d" % e.getcode()))
         else:
             self.assertTrue( False, "Another Error was thrown!")
