@@ -33,7 +33,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        # print(self.data.decode('utf-8'))
         reqPage = self.data.decode('utf-8').split(" ")[1]
         reqPageSplit = self.data.decode('utf-8').split(" ")[1].split("/")
         reqPageSplit = list(filter(None, reqPageSplit))
@@ -41,29 +40,43 @@ class MyWebServer(socketserver.BaseRequestHandler):
         mainDir = os.listdir("./www/")
         nestDir = [x for x in mainDir if "." not in x]
 
-        if ("Referer" not in self.data.decode('utf-8') and (".css" in reqPage or ".ico" in reqPage)):
-            print("no Ref", reqPageSplit)
-            self.request.sendall(
-                'HTTP/1.1 405 Not Found\r\n'.encode('utf-8'))
+        # if ("Referer" not in self.data.decode('utf-8') and (".css" in reqPage or ".ico" in reqPage)):
+        #     print("no Ref", reqPageSplit)
+        #     self.request.sendall(
+        #         'HTTP/1.1 405 Not Found\r\n'.encode('utf-8'))
+        #     return
+
+        if (".ico" in reqPage):
             return
 
-        print(reqPageSplit)
-        print(os.listdir("./www/"))
+        # print(reqPageSplit)
 
-        if (len(reqPageSplit) != 0 and reqPageSplit[0] == "favicon.ico"):
-            return
+        myFile = "./www/{}".format("/".join(reqPageSplit))
+        print(myFile)
+        if (myFile[-1] == "/"):
+            myFile += "index.html"
+        elif ("." not in myFile[1:]):
+            print("change")
+            myFile += "/index.html"
 
-        if (len(reqPageSplit) == 0 or 'index.html' in reqPageSplit[0]):
-            myFile = "./www/index.html"
-        else:
-            if (".css" in reqPageSplit[0]):
-                # print(reqPage)
-                myFile = "./www/base.css"
-            elif ("deep" in reqPageSplit[0]):
-                if (len(reqPageSplit) > 1 and ".css" in reqPageSplit[1]):
-                    myFile = "./www/deep/deep.css"
-                else:
-                    myFile = "./www/deep/index.html"
+        print(myFile)
+        # print("./www/{}".format("/".join(reqPageSplit)))
+        # if (len(reqPageSplit) == 0):
+        #     print("./www/index.html")
+        # else:
+        #     print("./www/{}".format("".join(reqPageSplit)))
+
+        # if (len(reqPageSplit) == 0 or 'index.html' in reqPageSplit[0]):
+        #     myFile = "./www/index.html"
+        # else:
+        #     if (".css" in reqPageSplit[0]):
+        #         # print(reqPage)
+        #         myFile = "./www/base.css"
+        #     elif ("deep" in reqPageSplit[0]):
+        #         if (len(reqPageSplit) > 1 and ".css" in reqPageSplit[1]):
+        #             myFile = "./www/deep/deep.css"
+        #         else:
+        #             myFile = "./www/deep/index.html"
 
         try:
             file = open(myFile, 'rb')
